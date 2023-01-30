@@ -37,11 +37,11 @@ void loop() {
   if (millis() - tiempoDatos >= intervaloDatos) {
     tiempoDatos = millis();
     paqueteEnviado.dato = millis() / 1000;
-    Datos();
+    enviarDatos();
   }
 }
 
-void Datos() {
+void enviarDatos() {
   esp_now_send(MAC_Receptor, (uint8_t*)&paqueteEnviado, sizeof(paqueteEnviado));
   Serial.print("Dato Enviado:");
   Serial.println(paqueteEnviado.dato);
