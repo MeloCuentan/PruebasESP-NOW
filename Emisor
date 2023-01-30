@@ -1,0 +1,49 @@
+/*
+  Esta programaicón está probada en un ESP8266
+*/
+
+// Incluímos todas las librerías
+#include <espnow.h>
+#include <ESP8266WiFi.h>
+
+// Definimos variables del ESPNOW
+#define MY_NAME "ELECTRONICA"
+#define MY_ROLE ESP_NOW_ROLE_CONTROLLER   // set the role of this device: CONTROLLER, SLAVE, COMBO
+#define RECEIVER_ROLE ESP_NOW_ROLE_SLAVE  // set the role of the receiver
+#define WIFI_CHANNEL 1
+
+uint8_t MAC_Receptor[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };  // Esta es la mac del receptor
+
+struct paqueteDatos {           // Este será el formato de datos que se enviarán a las pantallas
+  int dato;
+} paqueteEnviado;
+
+unsigned long tiempoDatos;
+int intervaloDatos = 1000;      // Tiempo que se envían los datos
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+
+  esp_now_init();
+  
+  esp_now_set_self_role(MY_ROLE);
+  esp_now_add_peer(MAC_Receptor, RECEIVER_ROLE, WIFI_CHANNEL, NULL, 0);
+
+}
+
+void loop() {
+  if (millis() - tiempoDatos >= intervaloDatos) {
+    tiempoDatos = millis();
+    paqueteEnviado.dato = millis() / 1000;
+    Datos();
+  }
+}
+
+void Datos() {
+  esp_now_send(MAC_Receptor, (uint8_t*)&paqueteEnviado, sizeof(paqueteEnviado));
+  Serial.print("Dato Enviado:");
+  Serial.println(paqueteEnviado.dato);
+}
